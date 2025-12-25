@@ -7,20 +7,19 @@
 
 Font font;
 
-const float uiWidth = 300.0f;
-const float windowWidth = 1100.0f;
-const float windowHeight = 800.0f;
-float dotRadius = 5.0f;
-float pointRadius = 3.0f;
-Color pointColor = LIME;
-
-Color pointLineColor = {40, 40, 40, 255};
-const Color uiColor = {29, 29, 29, 255};
-const Color textColor = {145, 145, 145, 255};
-const float margin = 16.0f;
-const int fontSize = 20;
-
+constexpr float uiWidth = 300.0f;
+constexpr float windowWidth = 1100.0f;
+constexpr float windowHeight = 800.0f;
+constexpr float margin = 16.0f;
+constexpr Color uiColor = {29, 29, 29, 255};
+constexpr Color textColor = {145, 145, 145, 255};
+constexpr int fontSize = 20;
 const float line = windowWidth-uiWidth;
+
+constexpr float dotRadius = 5.0f;
+constexpr float pointRadius = 3.0f;
+constexpr Color pointColor = LIME;
+constexpr Color pointLineColor = {40, 40, 40, 255};
 
 constexpr int MAX_STEPS = 150;
 constexpr int MIN_STEPS = 0;
@@ -46,7 +45,7 @@ float DistSquared(Vector2 p, Vector2 q)
     float dy = p.y - q.y;
     return dx*dx + dy*dy;
 }
-float Clamp(float v, float min, float max)
+int Clamp(int v, int min, int max)
 {
     return (v < min) ? min : (v > max) ? max : v;
 }
@@ -61,8 +60,9 @@ bool InButton(float x, float y, float by)
 
 void initWindow(); 
 void eventListener();
-Vector2 Lerp(Vector2 point1, Vector2 point2, float t); // Lerping between 2 points
-Vector2 BezierPoint(Vector2 a, Vector2 b, Vector2 c, Vector2 d, float t); // Lerping between 3 points
+Vector2 Lerp(Vector2 point1, Vector2 point2, float t);
+// Evaluate cubic Bézier using De Casteljau algorithm
+Vector2 BezierPoint(Vector2 a, Vector2 b, Vector2 c, Vector2 d, float t);
 void DrawBezier(Vector2 a, Vector2 b, Vector2 c, Vector2 d);
 void DragPoint(Vector2 &p);
 void DrawUI();
@@ -147,7 +147,7 @@ void eventListener()
         m.y >= button1.y && m.y <= button1.y + fontSize)
     {
         steps += GetMouseWheelMove();
-        steps = Clamp(steps, MIN_STEPS-1, MAX_STEPS+1);
+        steps = Clamp(steps, MIN_STEPS, MAX_STEPS);
     }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
@@ -185,6 +185,8 @@ void DrawBezier(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
 
     for (int i = 1; i <= steps; i++)
     {
+        if (steps <= 0) return;
+
         float t = (float)i / steps;
         Vector2 point = BezierPoint(a, b, c, d, t);
 
@@ -232,7 +234,7 @@ void DrawUI()
     DrawLineEx({line, margin+fontSize*9.5f}, {windowWidth, margin + fontSize*9.5f}, 2.0f, BLACK);
 
     DrawTextEx(font, "Spline:", {line + margin, margin + fontSize*10.0f}, fontSize, 0.0f, textColor);
-    DrawTextEx(font, "Curvature:", {line + margin, margin + fontSize*11.0f}, fontSize, 0.0f, textColor);
+    DrawTextEx(font, "Segments:", {line + margin, margin + fontSize*11.0f}, fontSize, 0.0f, textColor);
     DrawTextEx(font, std::to_string(steps).c_str(), button1, fontSize, 0.0f, splineColor);
     DrawTextEx(font, "Draw Dots?", {line + margin, margin + fontSize*13.0f}, fontSize, 0.0f, textColor);
     DrawTextEx(font, doDrawSplineDots ? "yes" : "no", button4, fontSize, 0.0f, splineColor);

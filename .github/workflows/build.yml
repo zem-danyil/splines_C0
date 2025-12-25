@@ -1,0 +1,54 @@
+name: SPLINES - C^0 CONTINUITY
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # ---------------- WINDOWS ----------------
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          choco install mingw -y
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install raylib:x64-windows
+          mkdir build
+          g++ src/main.cpp -std=c++17 -o build/main.exe `
+            -I vcpkg\installed\x64-windows\include `
+            -L vcpkg\installed\x64-windows\lib `
+            -lraylib -lopengl32 -lgdi32 -lwinmm
+
+      # ---------------- macOS ----------------
+      - name: Build (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install raylib
+          mkdir -p build
+          clang++ src/main.cpp -std=c++17 -o build/main \
+            -lraylib \
+            -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+
+      # ---------------- Linux ----------------
+      - name: Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install -y libraylib-dev
+          mkdir -p build
+          g++ src/main.cpp -std=c++17 -o build/main \
+            -lraylib \
+            -lGL -lm -lpthread -ldl -lrt -lX11
