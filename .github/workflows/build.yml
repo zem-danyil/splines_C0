@@ -30,7 +30,13 @@ jobs:
           g++ src/main.cpp -std=c++17 -Wall -Wextra -o build/main.exe `
             -I vcpkg\installed\x64-mingw-static\include `
             -L vcpkg\installed\x64-mingw-static\lib `
-            -lraylib -lopengl32 -lgdi32 -lwinmm
+            -lraylib -lglfw3 -lopengl32 -lgdi32 -lwinmm
+      - name: Upload Windows build
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: build/main.exe
 
       # ---------------- macOS ----------------
       - name: Build (macOS)
@@ -46,13 +52,32 @@ jobs:
             -framework Cocoa \
             -framework IOKit \
             -framework CoreVideo
+      - name: Upload macOS build
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: build/main
 
       # ---------------- Linux ----------------
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libx11-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libxcursor-dev \
+            libxi-dev \
+            libgl1-mesa-dev \
+            libasound2-dev \
+            pkg-config
+
       - name: Build (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          sudo apt update
-          sudo apt install -y build-essential curl zip unzip tar pkg-config
           git clone https://github.com/microsoft/vcpkg.git
           ./vcpkg/bootstrap-vcpkg.sh
           ./vcpkg/vcpkg install raylib
@@ -61,3 +86,9 @@ jobs:
             -I vcpkg/installed/x64-linux/include \
             -L vcpkg/installed/x64-linux/lib \
             -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+      - name: Upload Linux build
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: build/main
