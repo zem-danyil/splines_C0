@@ -25,11 +25,11 @@ jobs:
           choco install mingw -y
           git clone https://github.com/microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
-          .\vcpkg\vcpkg install raylib:x64-windows
-          mkdir build
-          g++ src/main.cpp -std=c++17 -o build/main.exe `
-            -I vcpkg\installed\x64-windows\include `
-            -L vcpkg\installed\x64-windows\lib `
+          .\vcpkg\vcpkg install raylib:x64-mingw-static
+          mkdir build -Force
+          g++ src/main.cpp -std=c++17 -Wall -Wextra -o build/main.exe `
+            -I vcpkg\installed\x64-mingw-static\include `
+            -L vcpkg\installed\x64-mingw-static\lib `
             -lraylib -lopengl32 -lgdi32 -lwinmm
 
       # ---------------- macOS ----------------
@@ -39,16 +39,25 @@ jobs:
           brew install raylib
           mkdir -p build
           clang++ src/main.cpp -std=c++17 -o build/main \
+            -I/opt/homebrew/include \
+            -L/opt/homebrew/lib \
             -lraylib \
-            -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+            -framework OpenGL \
+            -framework Cocoa \
+            -framework IOKit \
+            -framework CoreVideo
 
       # ---------------- Linux ----------------
       - name: Build (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt update
-          sudo apt install -y libraylib-dev
+          sudo apt install -y build-essential curl zip unzip tar pkg-config
+          git clone https://github.com/microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
+          ./vcpkg/vcpkg install raylib
           mkdir -p build
-          g++ src/main.cpp -std=c++17 -o build/main \
-            -lraylib \
-            -lGL -lm -lpthread -ldl -lrt -lX11
+          g++ src/main.cpp -std=c++17 -Wall -Wextra -o build/main \
+            -I vcpkg/installed/x64-linux/include \
+            -L vcpkg/installed/x64-linux/lib \
+            -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
