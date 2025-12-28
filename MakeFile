@@ -1,0 +1,13 @@
+IMGUI = C:/Users/inter/ImGUI
+SRC = src/main.cpp
+OUT = build/main.exe
+
+CXX = g++
+CXXFLAGS = -std=c++17 -I$(IMGUI) -I$(IMGUI)/backends -Wall -Wextra
+LIBS = -lglfw3 -lopengl32 -lgdi32
+
+IMGUI_SRC = $(IMGUI)/imgui.cpp $(IMGUI)/imgui_draw.cpp $(IMGUI)/imgui_widgets.cpp $(IMGUI)/imgui_tables.cpp \
+            $(IMGUI)/backends/imgui_impl_glfw.cpp $(IMGUI)/backends/imgui_impl_opengl3.cpp
+
+all:
+	$(CXX) $(SRC) $(IMGUI_SRC) $(CXXFLAGS) -o $(OUT) $(LIBS)

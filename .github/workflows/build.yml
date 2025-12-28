@@ -85,7 +85,7 @@ jobs:
           g++ src/main.cpp -std=c++17 -Wall -Wextra -o build/main \
             -I vcpkg/installed/x64-linux/include \
             -L vcpkg/installed/x64-linux/lib \
-            -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+            -lraylib -lglfw -lGL -lm -lpthread -ldl -lrt -lX11
       - name: Upload Linux build
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
